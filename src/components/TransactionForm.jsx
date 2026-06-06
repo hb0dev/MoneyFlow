@@ -13,6 +13,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TrendingUpRounded, TrendingDownRounded, SaveRounded } from '@mui/icons-material';
 import { CATEGORIES } from '../utils/categories.js';
 import { toISODate } from '../utils/format.js';
+import { useCurrency } from '../context/CurrencyContext.jsx';
 
 // Default empty form state. Date defaults to today, satisfying the requirement
 // that the date is auto-filled with the current date.
@@ -31,6 +32,7 @@ function emptyForm() {
 export default function TransactionForm({ initial, onSubmit, onCancel, submitLabel }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
+  const { symbol } = useCurrency();
 
   useEffect(() => {
     if (initial) {
@@ -93,7 +95,7 @@ export default function TransactionForm({ initial, onSubmit, onCancel, submitLab
           helperText={error || ' '}
           fullWidth
           InputProps={{
-            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+            startAdornment: <InputAdornment position="start">{symbol}</InputAdornment>,
           }}
         />
 

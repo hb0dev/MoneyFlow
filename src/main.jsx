@@ -6,6 +6,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import './index.css';
 import App from './App.jsx';
 import { ThemeModeProvider } from './theme/ThemeContext.jsx';
+import { CurrencyProvider } from './context/CurrencyContext.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { TransactionProvider } from './context/TransactionContext.jsx';
 
@@ -14,15 +15,17 @@ import { TransactionProvider } from './context/TransactionContext.jsx';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeModeProvider>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <BrowserRouter>
-          <AuthProvider>
-            <TransactionProvider>
-              <App />
-            </TransactionProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </LocalizationProvider>
+      <CurrencyProvider>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <BrowserRouter>
+            <AuthProvider>
+              <TransactionProvider>
+                <App />
+              </TransactionProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </LocalizationProvider>
+      </CurrencyProvider>
     </ThemeModeProvider>
   </React.StrictMode>
 );

@@ -9,12 +9,20 @@ import {
   Alert,
   Box,
   Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
 import {
   TrendingUpRounded,
   TrendingDownRounded,
   AccountBalanceWalletRounded,
   EventAvailableRounded,
+  AddCardRounded,
 } from '@mui/icons-material';
 import { useTransactions } from '../context/TransactionContext.jsx';
 import {
@@ -23,7 +31,8 @@ import {
   getDailySeries,
   getMonthlySeries,
 } from '../utils/stats.js';
-import { formatCurrency, formatLongDate } from '../utils/format.js';
+import { formatCurrency, formatLongDate, toISODate } from '../utils/format.js';
+import { useCurrency } from '../context/CurrencyContext.jsx';
 import StatCard from '../components/StatCard.jsx';
 import TransactionForm from '../components/TransactionForm.jsx';
 import RecentTransactions from '../components/RecentTransactions.jsx';
@@ -38,8 +47,12 @@ import LoadingState from '../components/LoadingState.jsx';
 // insights. Shows a skeleton on first paint for a professional load state.
 export default function Dashboard() {
   const { transactions, addTransaction, loading: dataLoading } = useTransactions();
+  const { symbol } = useCurrency();
   const [booting, setBooting] = useState(true);
   const [toast, setToast] = useState(null);
+  const [moneyOpen, setMoneyOpen] = useState(false);
+  const [moneyAmount, setMoneyAmount] = useState('');
+  const [moneyError, setMoneyError] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => setBooting(false), 400);
@@ -60,6 +73,35 @@ export default function Dashboard() {
     }
   };
 
+  const closeMoney = () => {
+    setMoneyOpen(false);
+    setMoneyAmount('');
+    setMoneyError('');
+  };
+
+  // "Add my money": records the entered amount as an income entry so it lifts
+  // the current balance. Persists like any other transaction.
+  const handleAddMoney = async () => {
+    const amount = Number(moneyAmount);
+    if (!moneyAmount || Number.isNaN(amount) || amount <= 0) {
+      setMoneyError('Enter an amount greater than zero.');
+      return;
+    }
+    try {
+      await addTransaction({
+        amount,
+        type: 'income',
+        category: 'other',
+        note: 'Money added',
+        date: toISODate(new Date()),
+      });
+      closeMoney();
+      setToast({ severity: 'success', msg: 'Money added to your balance.' });
+    } catch (err) {
+      setMoneyError(err.message || 'Could not add money.');
+    }
+  };
+
   if (booting || dataLoading) return <LoadingState />;
 
   return (
@@ -77,6 +119,14 @@ export default function Dashboard() {
           color="primary"
           variant="outlined"
         />
+        <Box sx={{ flexGrow: 1 }} />
+        <Button
+          variant="contained"
+          startIcon={<AddCardRounded />}
+          onClick={() => setMoneyOpen(true)}
+        >
+          Add Money
+        </Button>
       </Stack>
 
       {/* Statistics */}
@@ -176,6 +226,39 @@ export default function Dashboard() {
           </Card>
         </Grid>
       </Grid>
+
+      <Dialog open={moneyOpen} onClose={closeMoney} fullWidth maxWidth="xs">
+        <DialogTitle>Add Money</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Enter how much money to add. It is recorded as income and added to
+            your current balance.
+          </Typography>
+          <TextField
+            autoFocus
+            label="Amount"
+            value={moneyAmount}
+            onChange={(e) => setMoneyAmount(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddMoney()}
+            type="number"
+            inputProps={{ min: 0, step: '0.01' }}
+            error={Boolean(moneyError)}
+            helperText={moneyError || ' '}
+            fullWidth
+            InputProps={{
+              startAdornment: <InputAdornment position="start">{symbol}</InputAdornment>,
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={closeMoney} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleAddMoney} variant="contained" startIcon={<AddCardRounded />}>
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={Boolean(toast)}

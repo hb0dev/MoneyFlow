@@ -87,19 +87,6 @@ function SidebarContent({ onNavigate }) {
           );
         })}
       </List>
-
-      <Box
-        sx={{
-          p: 2,
-          borderRadius: 2,
-          bgcolor: 'action.hover',
-          textAlign: 'center',
-        }}
-      >
-        <Typography variant="caption" color="text.secondary">
-          Data is stored locally on this device.
-        </Typography>
-      </Box>
     </Box>
   );
 }

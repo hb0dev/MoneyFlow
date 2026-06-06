@@ -13,6 +13,7 @@ import {
   MenuItem,
   ListItemIcon,
   Divider,
+  Select,
 } from '@mui/material';
 import {
   MenuRounded,
@@ -23,6 +24,7 @@ import {
 } from '@mui/icons-material';
 import { useThemeMode } from '../../theme/ThemeContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useCurrency } from '../../context/CurrencyContext.jsx';
 import { formatLongDate } from '../../utils/format.js';
 
 const TITLES = {
@@ -36,6 +38,7 @@ const TITLES = {
 export default function Topbar({ onMenuClick, isDesktop }) {
   const { mode, toggleMode } = useThemeMode();
   const { user, logout } = useAuth();
+  const { currency, setCurrency, currencies } = useCurrency();
   const location = useLocation();
   const title = TITLES[location.pathname] || 'MoneyFlow';
 
@@ -71,6 +74,26 @@ export default function Topbar({ onMenuClick, isDesktop }) {
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} alignItems="center">
+          <Tooltip title="Display currency">
+            <Select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              size="small"
+              aria-label="select currency"
+              sx={{
+                '& .MuiSelect-select': { py: 0.5, pl: 1.25, pr: '28px !important', fontWeight: 600 },
+                '& fieldset': { borderColor: 'divider' },
+              }}
+              MenuProps={{ PaperProps: { sx: { maxHeight: 360 } } }}
+            >
+              {currencies.map((c) => (
+                <MenuItem key={c.code} value={c.code}>
+                  {c.code} — {c.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </Tooltip>
+
           <Tooltip title={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
             <IconButton onClick={toggleMode} aria-label="toggle theme">
               {mode === 'dark' ? <LightModeRounded /> : <DarkModeRounded />}
