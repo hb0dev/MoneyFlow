@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 
-// A single income/expense transaction, scoped to the owning user.
+// A single income/expense transaction, scoped to the owning user (identified
+// by username, which comes from the env-configured credentials).
 const transactionSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    user: { type: String, required: true, index: true },
     amount: { type: Number, required: true, min: 0 },
     type: { type: String, enum: ['income', 'expense'], required: true },
     category: { type: String, default: 'other' },
