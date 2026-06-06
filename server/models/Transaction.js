@@ -27,4 +27,8 @@ transactionSchema.set('toJSON', {
   },
 });
 
-export const Transaction = mongoose.model('Transaction', transactionSchema);
+// Reuse an already-compiled model if present. On Vercel, a warm lambda may
+// import this module more than once; calling mongoose.model twice would throw
+// an OverwriteModelError without this guard.
+export const Transaction =
+  mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
